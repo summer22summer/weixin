@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.bean.AdminTypeMapper">
+	<!-- 查询所有的管理员类别 -->
+	<select id="getAllAdminType" resultType="AdminType">
+		select typeid,regtime,typename from admintype 
+	</select>
+</mapper>

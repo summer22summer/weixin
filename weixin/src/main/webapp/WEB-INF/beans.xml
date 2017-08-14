@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:c="http://www.springframework.org/schema/c" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/task 
+        http://www.springframework.org/schema/task/spring-task-3.0.xsd
+        http://www.springframework.org/schema/mvc 
+           http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
+
+
+	<!-- 混合配置: 1. 开启包扫描，即读取包下带有注解的类，并托管 -->
+	<context:component-scan base-package="com.yc" />
+	<!-- 开启spring mvc的注解解析 -->
+	<mvc:annotation-driven />
+	<!-- 开启aspectj的自动代理机制 -->
+	<aop:aspectj-autoproxy />
+	
+	<!-- 读取属性配置文件 连接数据库 -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations" value="classpath*:db.properties" />
+	</bean>
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+	<!-- 配置 mybatis中的sqlsessionactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 在这个 sqlSessionFactory中，主要要完成读取 mybatis的配置文件的工作 -->
+		<!-- 数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 如果不读取 mybatis-config.xml文件，那 typealiases, mapper的配置都要单独配 -->
+		<property name="typeAliasesPackage" value="com/yc/bean" />
+		<property name="mapperLocations" value="classpath*:com/yc/bean/*.xml" />
+		<!-- 主要用来配置mybatis中的 configuration中的settings配置 -->
+		<property name="configurationProperties">
+			<props>
+				<prop key="logImpl">LOG4J</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 通过工厂创建 session -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<!-- 使用构造方法进行di -->
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	<!-- spring mvc 视图解析器 , 访问的页面都在 /pages/xxx.jsp -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/pages/" />
+		<property name="suffix" value=".jsp" />
+	</bean>	
+
+	
+	<!-- EasyUI样式，JS配置 -->
+	<mvc:resources location="/demo/" mapping="/demo/**"></mvc:resources>
+	<mvc:resources location="/locale/" mapping="/locale/**"></mvc:resources>
+	<mvc:resources location="/plugins/" mapping="/demo/**"></mvc:resources>
+	<mvc:resources location="/themes/" mapping="/themes/**"></mvc:resources>
+	<mvc:resources location="/page/" mapping="/page/**"></mvc:resources>
+
+	<mvc:resources location="/" mapping="/**"></mvc:resources>
+
+</beans>
